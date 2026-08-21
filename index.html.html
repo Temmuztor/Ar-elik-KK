@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ÇKK Gün Sonu Kartı</title>
+<style>
+  :root{
+    --indigo:#241f4d;        /* koyu indigo - başlık/ana yüzey */
+    --indigo-2:#332a6b;
+    --blue:#2f6fed;          /* ana aksiyon */
+    --blue-dark:#1f4fb5;
+    --orange:#e07b1a;        /* dikkat: hata / iade alanları */
+    --orange-soft:#fbead6;
+    --slate:#2b303a;         /* metin */
+    --muted:#6b7280;         /* ikincil metin */
+    --line:#e3e6ee;
+    --surface:#ffffff;
+    --bg:#f4f5f9;
+    --ok:#3f4a8c;            /* onay tonu (yeşil yerine indigo-mavi) */
+    --radius:12px;
+    --ui: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+    --mono: "SFMono-Regular", "Consolas", "Menlo", "Liberation Mono", monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--slate);font-family:var(--ui);line-height:1.45}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px 60px}
+
+  header.top{background:var(--indigo);color:#fff;padding:22px 24px;border-radius:0 0 var(--radius) var(--radius)}
+  header.top h1{margin:0;font-size:20px;font-weight:650;letter-spacing:.2px}
+  header.top p{margin:4px 0 0;color:#c7c9e6;font-size:13px}
+  .brand{display:flex;align-items:center;gap:16px}
+  .logo{flex-shrink:0;height:52px;display:flex;align-items:center}
+  .logo img{height:52px;width:auto;display:block;background:#fff;border-radius:8px;padding:4px}
+  .logo .fallback{height:52px;min-width:52px;padding:0 14px;background:#fff;color:var(--indigo);
+    border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;
+    letter-spacing:1px;font-size:22px}
+
+  .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;margin-top:22px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 20px}
+  .card h2{margin:0 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.7px;color:var(--indigo)}
+  .card .sub{margin:0 0 16px;font-size:12px;color:var(--muted)}
+
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row.three{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:520px){.row,.row.three{grid-template-columns:1fr}}
+  .field{margin-bottom:12px}
+  .field.full{grid-column:1/-1}
+  label{display:block;font-size:12px;font-weight:600;color:var(--slate);margin-bottom:5px}
+  label .hint{font-weight:400;color:var(--muted)}
+  label .req{color:var(--orange);font-weight:700;margin-left:2px}
+  .infobtn{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;
+    background:var(--blue);color:#fff;font-size:11px;font-weight:700;margin-left:6px;cursor:pointer;border:none;line-height:1;vertical-align:middle;padding:0}
+  .infobtn:hover{background:var(--blue-dark)}
+  .infomodal{display:none;position:fixed;inset:0;background:rgba(20,20,45,.5);z-index:100;align-items:center;justify-content:center;padding:20px}
+  .infomodal.show{display:flex}
+  .infobox{background:#fff;border-radius:12px;max-width:440px;width:100%;box-shadow:0 20px 55px rgba(0,0,0,.3);overflow:hidden}
+  .infohead{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--indigo);color:#fff;padding:12px 16px;font-weight:650;font-size:14px}
+  .infoclose{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:0}
+  .infobody{padding:16px;font-size:13.5px;line-height:1.6;color:var(--slate)}
+  .infobody b{color:var(--indigo)}
+  input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;
+    font-family:var(--ui);font-size:14px;color:var(--slate);background:#fff}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,111,237,.14)}
+  textarea{resize:vertical;min-height:52px}
+  input[readonly]{background:#f0f1f6;color:var(--muted);cursor:not-allowed}
+  .attn input, .attn select{border-color:#eccaa0;background:#fffaf3}
+  .attn input:focus,.attn select:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(224,123,26,.15)}
+
+  .btn{border:none;border-radius:9px;padding:11px 16px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--ui)}
+  .btn.primary{background:var(--blue);color:#fff}
+  .btn.primary:hover{background:var(--blue-dark)}
+  .btn.ghost{background:#eef1f8;color:var(--indigo)}
+  .btn.ghost:hover{background:#e2e7f5}
+  .btn.warnclear{background:#fff;color:var(--orange);border:1px solid #eccaa0}
+  .btn.warnclear:hover{background:var(--orange-soft)}
+  .btn.block{width:100%}
+  .actions{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+
+  .warnline{font-size:12px;color:var(--orange);margin:2px 0 10px;min-height:14px}
+
+  /* WhatsApp önizleme */
+  .preview{background:var(--indigo);border-radius:var(--radius);padding:16px;position:sticky;top:14px}
+  .preview .plabel{color:#c7c9e6;font-size:11px;letter-spacing:.6px;text-transform:uppercase;margin:0 0 10px}
+  .bubble{background:#f7f8fb;border-radius:10px;padding:14px 14px;font-family:var(--mono);font-size:13px;
+    white-space:pre-wrap;word-break:break-word;color:#20242e;min-height:120px}
+  .preview .pact{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+
+  /* Gün listesi */
+  .daybar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .count{font-size:13px;color:var(--muted)}
+  .count b{color:var(--indigo);font-size:15px}
+  .list{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow:auto}
+  .item-wrap{border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 11px;font-size:13px}
+  .item .meta{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .item .pno{font-weight:650;color:var(--indigo)}
+  .item .det{color:var(--muted);font-size:12px}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;margin-left:6px}
+  .tag.kabul{background:#e7ecfb;color:var(--ok)}
+  .tag.kismi{background:var(--orange-soft);color:#b85f10}
+  .tag.tam{background:#f6dfc7;color:#a44f08}
+  .tag.merge{background:#e4ebfa;color:var(--blue-dark);cursor:pointer;user-select:none}
+  .tag.merge:hover{background:#d3def6}
+  .tag.merge i{font-style:normal;font-size:10px}
+  .entries{border-top:1px dashed var(--line);background:#faf9fc;padding:4px 11px 8px}
+  .entry{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .entry:last-child{border-bottom:none}
+  .entry .ehead{font-weight:650;color:var(--indigo);font-size:12px;min-width:96px}
+  .entry .edet{color:var(--muted);font-size:12px;flex:1;min-width:180px}
+  .entry .mini{flex-shrink:0}
+  .item .x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px}
+  .item .x:hover{color:var(--orange)}
+  .empty{color:var(--muted);font-size:13px;padding:18px;text-align:center;border:1px dashed var(--line);border-radius:9px}
+  .savenote{font-size:12px;color:var(--muted);margin:0 0 12px;display:flex;align-items:center;gap:7px}
+  .savenote .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block}
+  .savenote.off .dot{background:var(--muted)}
+  .crossday{background:var(--orange-soft);border:1px solid #eccaa0;color:#9c5410;font-size:13px;
+    padding:10px 12px;border-radius:9px;margin:0 0 12px;display:none}
+  .crossday.show{display:block}
+  .editflag{display:none;margin-top:12px;font-size:12px;color:var(--indigo);background:#eef1f8;
+    border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+  .editflag.show{display:block}
+  .linkbtn{background:none;border:none;color:var(--orange);cursor:pointer;font-weight:600;font-size:12px;padding:0 2px;text-decoration:underline}
+  .item .btns{display:flex;gap:5px;align-items:center;flex-shrink:0}
+  .item .mini{background:#eef1f8;border:none;color:var(--indigo);cursor:pointer;font-size:11px;font-weight:600;border-radius:6px;padding:5px 9px}
+  .item .mini:hover{background:#e2e7f5}
+
+  .mailset{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  @media(max-width:520px){.mailset{grid-template-columns:1fr}}
+  .exportbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--indigo);color:#fff;
+    padding:11px 18px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50}
+  .toast.show{opacity:1}
+  .foot{margin-top:26px;font-size:12px;color:var(--muted);text-align:center}
+
+  /* --- Yazdırma --- */
+  #printArea{display:none}
+  @media print{
+    body{background:#fff}
+    body > .wrap, header.top, .toast{display:none !important}
+    #printArea{display:block;padding:0}
+    .pr-head{display:flex;align-items:center;gap:14px;border-bottom:2px solid #241f4d;padding-bottom:10px;margin-bottom:14px}
+    .pr-head .pr-logo{height:46px}
+    .pr-head .pr-fallback{font-weight:800;font-size:20px;letter-spacing:1px;color:#241f4d;border:2px solid #241f4d;border-radius:6px;padding:4px 10px}
+    .pr-head h2{margin:0;font-size:17px;color:#241f4d}
+    .pr-head .pr-meta{margin:2px 0 0;font-size:12px;color:#444}
+    .pr-sum{font-size:12px;margin:0 0 12px;color:#222}
+    table.pr{width:100%;border-collapse:collapse;font-size:11px}
+    table.pr th,table.pr td{border:1px solid #999;padding:4px 6px;text-align:left;vertical-align:top}
+    table.pr th{background:#eef1f8;color:#241f4d;font-weight:700}
+    table.pr tr.tot td{font-weight:700;background:#f4f5f9}
+    .pr-foot{margin-top:14px;font-size:10px;color:#666}
+    @page{margin:14mm}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap brand" style="padding-left:0;padding-right:0;padding-bottom:0">
+    <div class="logo">
+      <img src="udea-logo.png" alt="UDEA" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="fallback" style="display:none">UDEA</div>
+    </div>
+    <div>
+      <h1>Arçelik Kalite Kontrol - Gün Sonu Kartı</h1>
+      <p>Kontrol sonrası veya gün sonu doldur · Her parça numarası için ayrı kart · WhatsApp metnini kopyala ve gönder</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- Sabit oturum bilgisi -->
+  <div class="card" style="margin-top:22px">
+    <h2>Kontrol Eden / Gün</h2>
+    <p class="sub">Bir kez doldur; gün boyu kartlarda tekrar kullanılır.</p>
+    <div class="row three">
+      <div class="field"><label>Kontrol Eden Kişi<span class="req">*</span><button class="infobtn" type="button" onclick="showInfo('tech')" title="Bu alan ne için?">!</button></label><input id="tech" placeholder="Örn. A. Yılmaz"></div>
+      <div class="field"><label>Tarih<button class="infobtn" type="button" onclick="showInfo('date')" title="Bu alan ne için?">!</button></label><input id="date" type="date"></div>
+      <div class="field"><label>Vardiya <span class="hint">(ops.)</span><button class="infobtn" type="button" onclick="showInfo('shift')" title="Bu alan ne için?">!</button></label>
+        <select id="shift"><option value="">—</option><option>Gündüz</option><option>Fazla Mesai</option></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Kart giriş -->
+    <div class="card">
+      <h2>Parça Kartı</h2>
+      <p class="sub">Bu parça numarası için değerleri gir, sonra "Kartı ekle".</p>
+
+      <div class="field full"><label>Parça No<span class="req">*</span><button class="infobtn" type="button" onclick="showInfo('pno')" title="Bu alan ne için?">!</button></label><input id="pno" placeholder="Örn. UB-58-16"></div>
+      <div class="field full"><label>Parça Tanımı<button class="infobtn" type="button" onclick="showInfo('ptan')" title="Bu alan ne için?">!</button></label><input id="ptan" placeholder="Örn. Ana kontrol kartı"></div>
+
+      <div class="row three">
+        <div class="field"><label>Kaliteye Gelen Adet<span class="req">*</span> <span class="hint">(lot toplamı)</span><button class="infobtn" type="button" onclick="showInfo('gelen')" title="Bu alan ne için?">!</button></label><input id="gelen" type="number" min="0" inputmode="numeric"></div>
+        <div class="field"><label>Kontrol Edilen<span class="req">*</span> <span class="hint">(örneklem)</span><button class="infobtn" type="button" onclick="showInfo('ornek')" title="Bu alan ne için?">!</button></label><input id="ornek" type="number" min="0" inputmode="numeric"></div>
+        <div class="field attn"><label>Hata Adedi<span class="req">*</span> <span class="hint">(örneklemde)</span><button class="infobtn" type="button" onclick="showInfo('hata')" title="Bu alan ne için?">!</button></label><input id="hata" type="number" min="0" inputmode="numeric"></div>
+      </div>
+      <div class="warnline" id="warn"></div>
+
+      <div class="field full"><label>Lot Durumu<button class="infobtn" type="button" onclick="showInfo('durum')" title="Bu alan ne için?">!</button></label>
+        <select id="durum"><option>Kabul</option><option>Kısmi Ret</option><option>Tam Ret</option></select>
+      </div>
+      <div class="field full"><label>Hata Açıklaması <span class="hint">(hata varsa zorunlu)</span><button class="infobtn" type="button" onclick="showInfo('hacik')" title="Bu alan ne için?">!</button></label><textarea id="hacik" placeholder="Örn. switch bacağında çapak, basmama"></textarea></div>
+
+      <div class="row">
+        <div class="field attn"><label>İade Edilen Adet<span class="req">*</span><button class="infobtn" type="button" onclick="showInfo('iade')" title="Bu alan ne için?">!</button></label><input id="iade" type="number" min="0" inputmode="numeric" value=""></div>
+        <div class="field attn"><label>Üretim İade Kontrolü Sonrası Ek Hata <span class="hint">(sonradan gelebilir)</span><button class="infobtn" type="button" onclick="showInfo('ekhata')" title="Bu alan ne için?">!</button></label><input id="ekhata" type="number" min="0" inputmode="numeric"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="submitBtn" onclick="submitCard()">Kartı ekle</button>
+        <button class="btn ghost" onclick="clearForm()">Formu temizle</button>
+      </div>
+      <div class="editflag" id="editflag"></div>
+    </div>
+
+    <!-- WhatsApp önizleme -->
+    <div>
+      <div class="preview">
+        <p class="plabel">WhatsApp önizleme</p>
+        <div class="bubble" id="bubble">Alanları doldurdukça mesaj burada oluşur…</div>
+        <div class="pact">
+          <button class="btn primary" onclick="copyCurrent()">Bu mesajı kopyala</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gün listesi + dışa aktarma -->
+  <div class="card" style="margin-top:20px">
+    <div class="daybar">
+      <h2 style="margin:0">Bugün eklenen kartlar</h2>
+      <span class="count"><b id="cnt">0</b> kart</span>
+    </div>
+    <p class="savenote" id="savenote"><span class="dot"></span><span id="savetext">Eklenen kartlar bu tarayıcıda otomatik kaydedilir — yanlışlıkla kapatırsan kaybolmaz.</span></p>
+    <div class="crossday" id="crossday"></div>
+    <div id="list" class="list"><div class="empty">Henüz kart eklenmedi.</div></div>
+
+    <div class="mailset">
+      <div class="field"><label>E-posta "Kime" <span class="hint">(sabit)</span></label><input id="mailto" type="text" value="temmuz.tor@udea.com.tr, ilker.sabit@udea.com.tr" readonly title="Bu alan sabittir; değiştirmek için Temmuz'a bildirin."></div>
+      <div class="field"><label>E-posta "Bilgi / CC" <span class="hint">(ops.)</span></label><input id="mailcc" type="text" placeholder="birden fazla için virgülle ayır"></div>
+    </div>
+
+    <div class="exportbar">
+      <button class="btn ghost" onclick="copyAllWhatsapp()">Günün tümünü WhatsApp metni olarak kopyala</button>
+      <button class="btn ghost" onclick="copyExcel()">Excel'e yapıştır (tablo)</button>
+      <button class="btn ghost" onclick="openEmail()">E-posta oluştur</button>
+      <button class="btn ghost" onclick="printReport()">Yazdır / PDF</button>
+      <button class="btn warnclear" onclick="resetDay()">Günü sıfırla</button>
+    </div>
+  </div>
+
+  <p class="foot">Kartlar bu bilgisayarda, bu tarayıcıya otomatik kaydedilir; internete gitmez. Gönderdikten / Excel'e aktardıktan sonra "Günü sıfırla" ile temizle.</p>
+</div>
+
+<!-- Sadece yazdırmada görünen temiz rapor alanı -->
+<div id="printArea"></div>
+
+<!-- Alan açıklama penceresi -->
+<div class="infomodal" id="infomodal" onclick="if(event.target===this)closeInfo()">
+  <div class="infobox">
+    <div class="infohead"><span id="infotitle"></span><button class="infoclose" type="button" onclick="closeInfo()">×</button></div>
+    <div class="infobody" id="infobody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // --- durum ---
+  let cards = [];
+  const STORAGE_KEY = 'ckk_gun_sonu_v1';
+  const todayISO = new Date().toISOString().slice(0,10);
+  let storageOK = true;   // ortam localStorage'a izin vermezse false olur
+
+  // tarih varsayılan bugün
+  const dEl = document.getElementById('date');
+  dEl.value = todayISO;
+
+  // --- kalıcı kayıt (localStorage) ---
+  function saveState(){
+    if(!storageOK) return;
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        savedDate: todayISO,
+        tech: document.getElementById('tech').value,
+        shift: document.getElementById('shift').value,
+        mailcc: document.getElementById('mailcc').value,
+        cards: cards
+      }));
+    }catch(e){ storageOK=false; markStorageOff(); }
+  }
+  function loadState(){
+    let raw=null;
+    try{ raw = localStorage.getItem(STORAGE_KEY); }
+    catch(e){ storageOK=false; markStorageOff(); return; }
+    if(!raw) return;
+    try{
+      const s = JSON.parse(raw);
+      if(s && Array.isArray(s.cards)){
+        cards = s.cards;
+        cards.forEach(c=>{
+          if(!c.entries){
+            c.entries=[{gelen:c.gelen, ornek:c.ornek, hata:c.hata, durum:c.durum||'Kabul', iade:c.iade, ekhata:c.ekhata, hacik:c.hacik, time:''}];
+          }
+          if(!c.mergedCount) c.mergedCount=c.entries.length;
+        });
+        if(s.tech) document.getElementById('tech').value = s.tech;
+        if(s.shift) document.getElementById('shift').value = s.shift;
+        if(s.mailcc) document.getElementById('mailcc').value = s.mailcc;
+        // önceki güne ait kayıt uyarısı
+        if(s.savedDate && s.savedDate !== todayISO && cards.length){
+          const b=document.getElementById('crossday');
+          b.textContent = 'Kayıtlı '+cards.length+' kart önceki güne ait ('+
+            (s.savedDate.split('-').reverse().join('.'))+'). Yeni güne başlamak için "Günü sıfırla".';
+          b.classList.add('show');
+        }
+      }
+    }catch(e){ /* bozuk kayıt: yok say */ }
+  }
+  function markStorageOff(){
+    const n=document.getElementById('savenote');
+    n.classList.add('off');
+    document.getElementById('savetext').textContent =
+      'Not: bu ortamda otomatik kayıt kapalı — dosyayı indirip kendi bilgisayarında açtığında kayıt çalışır.';
+  }
+
+  const $ = id => document.getElementById(id);
+  const val = id => $(id).value.trim();
+  const num = id => { const v=$(id).value.trim(); return v===''?null:Math.max(0, parseInt(v,10)||0); };
+
+  // --- alan açıklamaları (! butonu) ---
+  const INFO = {
+    tech:['Kontrol Eden Kişi','Kontrolü yapan kişinin adı ya da kodu. Gün boyunca tüm kartlarda aynı kalır; bir kez yazman yeterli.'],
+    date:['Tarih','Ürünün <b>kontrol edildiği gün</b>. Otomatik olarak bugüne ayarlıdır. Geç dolduruyorsan (örneğin Cuma kontrolünü Pazartesi giriyorsan) işi yaptığın günü seç — kaydı ne zaman yaptığın değil, kontrol tarihi önemli.'],
+    shift:['Çalışma','Kontrolün yapıldığı dilim: <b>Gündüz</b> veya <b>Fazla Mesai</b>.<br><br>Her kart, <b>eklendiği andaki</b> seçime göre kaydedilir. Fazla mesaiye kalınca bu alanı “Fazla Mesai” yap; o andan sonra eklediğin kartlar fazla mesai olarak işaretlenir. Rapor (WhatsApp/e-posta) kartları Gündüz ve Fazla Mesai olarak <b>ayrı gruplar</b> halinde gösterir.'],
+    pno:['Parça No','Kontrol edilen ürünün parça numarası. Aynı parça numarasını gün içinde tekrar girersen program “birleştirilsin mi?” diye sorar; birleştirirsen adetler tek kartta toplanır.'],
+    ptan:['Parça Tanımı','Parçanın adı/tanımı (örn. Ana kontrol kartı). İsteğe bağlıdır ama e-posta ve yazdırma çıktısında görünür.'],
+    gelen:['Kaliteye Gelen Adet','Kaliteye o partide gelen <b>toplam ürün adedi</b> (lot büyüklüğü). Örneklemi bu partiden alırsın.'],
+    ornek:['Kontrol Edilen (Örneklem)','Bu partiden örnekleme planına göre alıp <b>fiilen kontrol ettiğin</b> ürün adedi. Gelen adetten büyük olamaz.'],
+    hata:['Hata Adedi','Kontrol ettiğin <b>örneklem içinde</b> bulduğun hatalı ürün adedi.<br><br><b>Önemli:</b> bu sayı örneklem adedinden <b>büyük olamaz</b> — sadece baktığın ürünlerde hata bulabilirsin. Partinin tamamını reddettiysen o sayıyı buraya değil, <b>İade Edilen Adet</b>’e yaz. Üretimin sonradan bulduğu hatalar da buraya değil, <b>Üretim İade Kontrolü Sonrası Ek Hata</b> alanına girer.'],
+    hacik:['Hata Açıklaması','Bulunan hatanın kısa açıklaması (örn. switch bacağında çapak). Hata adedi 0’dan büyükse zorunludur; hata yoksa boş bırakabilirsin.'],
+    durum:['Lot Durumu','Partinin kalite kararı: <b>Kabul</b> (partiyi geçtin), <b>Kısmi Ret</b> (bir kısmını/kutuyu reddettin) veya <b>Tam Ret</b> (partinin tamamını reddettin).'],
+    iade:['İade Edilen Adet','Üretime geri gönderdiğin (iade ettiğin) ürün adedi. Tüm parti reddedilebileceği için bu sayı örneklemden fazla olabilir — ama gelen adetten büyük olamaz.'],
+    ekhata:['Üretim İade Kontrolü Sonrası Ek Hata','İade ettiğin partiyi üretim %100 kontrol edip sana <b>ek hata</b> bildirdiğinde o sayıyı buraya yaz. Genelde sonradan (ertesi gün) gelir; o an kartı <b>Düzenle</b> ile açıp doldurabilirsin. Mesaj ve e-postada <b>Toplam Hata = Hata Adedi + bu alan</b> olarak gösterilir.']
+  };
+  function showInfo(k){ const it=INFO[k]; if(!it) return; $('infotitle').textContent=it[0]; $('infobody').innerHTML=it[1]; $('infomodal').classList.add('show'); }
+  function closeInfo(){ $('infomodal').classList.remove('show'); }
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeInfo(); });
+
+  function fmtDate(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); return `${d}.${m}.${y}`; }
+
+  // canlı önizleme + uyarı
+  ['pno','ptan','gelen','ornek','hata','durum','hacik','iade','ekhata','tech','date','shift']
+    .forEach(id => $(id).addEventListener('input', render));
+
+  function currentData(){
+    return {
+      tarih: $('date').value, tech: val('tech'), shift: val('shift'),
+      pno: val('pno'), ptan: val('ptan'),
+      gelen: num('gelen'), ornek: num('ornek'), hata: num('hata'),
+      durum: val('durum'), hacik: val('hacik'),
+      iade: num('iade'), ekhata: num('ekhata')
+    };
+  }
+
+  // --- birleştirme yardımcıları ---
+  const norm = s => (s||'').trim().toLocaleUpperCase('tr');
+  function nowHM(){ const t=new Date(); return ('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2); }
+  const DURUM_RANK = {'Kabul':0,'Kısmi Ret':1,'Tam Ret':2};
+  function worstDurum(a,b){ return (DURUM_RANK[b]??0) > (DURUM_RANK[a]??0) ? b : a; }
+  function entryFrom(d){ return {gelen:d.gelen, ornek:d.ornek, hata:d.hata, durum:d.durum||'Kabul', iade:d.iade, ekhata:d.ekhata, hacik:d.hacik, time:nowHM()}; }
+  function recalcCard(c){
+    let gelen=0,ornek=0,hata=0,iade=0,ek=null,durum='Kabul'; const acik=[];
+    c.entries.forEach(e=>{
+      gelen+=e.gelen||0; ornek+=e.ornek||0; hata+=e.hata||0; iade+=e.iade||0;
+      if(e.ekhata!=null) ek=(ek||0)+e.ekhata;
+      durum=worstDurum(durum, e.durum||'Kabul');
+      if(e.hacik) acik.push(e.hacik);
+    });
+    c.gelen=gelen; c.ornek=ornek; c.hata=hata; c.iade=iade; c.ekhata=ek; c.durum=durum;
+    c.hacik=[...new Set(acik)].join(' | ');
+    c.mergedCount=c.entries.length;
+  }
+  function makeCard(d){ const c={tarih:d.tarih, tech:d.tech, shift:d.shift, pno:d.pno, ptan:d.ptan, entries:[entryFrom(d)]}; recalcCard(c); return c; }
+
+  function cardBlockWA(c){
+    const L=[];
+    L.push('Parça No   : ' + (c.pno||'-'));
+    if((c.mergedCount||1) > 1){
+      const saatler = (c.entries||[]).map(e=>e.time).filter(Boolean).join(', ');
+      L.push('('+c.mergedCount+' girişten birleşti'+(saatler?' — '+saatler:'')+')');
+    }
+    L.push('Gelen Adet : ' + (c.gelen ?? '-'));
+    L.push('Örneklem   : ' + (c.ornek ?? '-'));
+    L.push('Hata Adedi : ' + (c.hata ?? '-'));
+    L.push('Açıklama   : ' + (c.hacik || '-'));
+    L.push('Lot Durumu : ' + (c.durum || '-'));
+    L.push('İade Adedi : ' + (c.iade ?? '-'));
+    L.push('Üretim Ek Hata: ' + (c.ekhata ?? '-'));
+    if(c.ekhata>0) L.push('Toplam Hata : ' + ((c.hata||0)+(c.ekhata||0)));
+    return L.join('\n');
+  }
+  function buildWhatsappAll(){
+    const t=computeTotals();
+    const who=(cards[0]&&cards[0].tech)||val('tech')||'-';
+    const H=[];
+    H.push('ARÇELİK ÇKK GÜN SONU RAPORU');
+    H.push('Tarih        : '+reportDateLabel());
+    H.push('Kontrol Eden : '+who);
+    H.push('------------------------------');
+    H.push('GÜN ÖZETİ');
+    H.push('Toplam ürün  : '+t.parts);
+    H.push('Gelen        : '+t.gelen);
+    H.push('Kontrol      : '+t.ornek);
+    H.push('Hata         : '+t.hata);
+    if(t.ekhata>0){ H.push('Üretim Ek    : '+t.ekhata); H.push('Toplam Hata  : '+(t.hata+t.ekhata)); }
+    H.push('İade         : '+t.iade);
+    const body=[];
+    groupByShift().forEach(g=>{
+      body.push('==============================');
+      body.push(g.shift.toLocaleUpperCase('tr')+'  ('+g.list.length+' ürün)');
+      g.list.forEach(c=>{ body.push('------------------------------'); body.push(cardBlockWA(c)); });
+    });
+    return H.join('\n')+'\n'+body.join('\n')+'\n==============================';
+  }
+  function groupByShift(){
+    const order=['Gündüz','Fazla Mesai'];
+    const g={};
+    cards.forEach(c=>{ const k=c.shift||'Çalışma belirtilmemiş'; (g[k]=g[k]||[]).push(c); });
+    return Object.keys(g).sort((a,b)=>{
+      const ia=order.indexOf(a), ib=order.indexOf(b);
+      return (ia<0?99:ia)-(ib<0?99:ib);
+    }).map(k=>({shift:k, list:g[k]}));
+  }
+  function previewCard(d){ return {pno:d.pno, gelen:d.gelen, ornek:d.ornek, hata:d.hata, hacik:d.hacik, durum:d.durum, iade:d.iade, ekhata:d.ekhata, mergedCount:1}; }
+
+  function render(){
+    const d = currentData();
+    const anything = d.pno||d.gelen!=null||d.ornek!=null||d.hata!=null;
+    $('bubble').textContent = anything ? cardBlockWA(previewCard(d)) : 'Alanları doldurdukça mesaj burada oluşur…';
+
+    // mantık uyarıları (engellemez, uyarır)
+    let w = '';
+    if(d.ornek!=null && d.gelen!=null && d.ornek>d.gelen) w='Örneklem, gelen adetten büyük görünüyor.';
+    else if(d.hata!=null && d.ornek!=null && d.hata>d.ornek) w='Hata adedi, örneklemden büyük görünüyor.';
+    else if(d.iade!=null && d.gelen!=null && d.iade>d.gelen) w='İade adedi, gelen adetten büyük görünüyor.';
+    $('warn').textContent = w;
+  }
+
+  let editingIndex = null;
+  let editingEntry = null;   // {i,k} — belirli bir girişi düzenlerken
+
+  function clearPartFields(){
+    ['pno','ptan','gelen','ornek','hata','hacik','iade','ekhata'].forEach(id=>$(id).value='');
+    $('durum').value='Kabul';
+  }
+  function fillForm(d){
+    $('pno').value=d.pno||''; $('ptan').value=d.ptan||'';
+    $('gelen').value=d.gelen??''; $('ornek').value=d.ornek??''; $('hata').value=d.hata??'';
+    $('durum').value=d.durum||'Kabul'; $('hacik').value=d.hacik||'';
+    $('iade').value=d.iade??''; $('ekhata').value=d.ekhata??'';
+    if(d.tech) $('tech').value=d.tech;
+    if(d.shift) $('shift').value=d.shift;
+    if(d.tarih) $('date').value=d.tarih;
+  }
+  function enterEditMode(i){
+    editingIndex=i;
+    $('submitBtn').textContent='Kartı güncelle';
+    const f=$('editflag'); f.classList.add('show');
+    f.innerHTML='Düzenlenen kart: <b>'+esc(cards[i].pno)+'</b> — değişiklikleri kaydetmek için “Kartı güncelle”. '+
+      '<button class="linkbtn" onclick="clearForm()">Vazgeç</button>';
+  }
+  function exitEditMode(){
+    editingIndex=null;
+    editingEntry=null;
+    $('submitBtn').textContent='Kartı ekle';
+    $('editflag').classList.remove('show');
+  }
+  function enterEntryEditMode(i,k){
+    editingEntry={i,k}; editingIndex=null;
+    $('submitBtn').textContent='Girişi güncelle';
+    const f=$('editflag'); f.classList.add('show');
+    f.innerHTML='<b>'+esc(cards[i].pno)+'</b> — '+(k+1)+'. giriş düzenleniyor. Kaydetmek için “Girişi güncelle”. '+
+      '<button class="linkbtn" onclick="clearForm()">Vazgeç</button>';
+  }
+  function editEntry(i,k){
+    const c=cards[i], e=c.entries[k];
+    $('pno').value=c.pno||''; $('ptan').value=c.ptan||'';
+    $('gelen').value=e.gelen??''; $('ornek').value=e.ornek??''; $('hata').value=e.hata??'';
+    $('durum').value=e.durum||'Kabul'; $('hacik').value=e.hacik||'';
+    $('iade').value=e.iade??''; $('ekhata').value=e.ekhata??'';
+    enterEntryEditMode(i,k);
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+    $('gelen').focus();
+  }
+
+  function submitCard(){
+    const d = currentData();
+    // zorunlu alanlar (sayısal alanlarda 0 geçerli sayılır, sadece boş reddedilir)
+    const required = [
+      ['tech',  d.tech,          !d.tech,          'Kontrol Eden Kişi'],
+      ['pno',   d.pno,           !d.pno,           'Parça No'],
+      ['gelen', d.gelen,         d.gelen==null,    'Gelen Adet'],
+      ['ornek', d.ornek,         d.ornek==null,    'Kontrol Edilen Adet'],
+      ['hata',  d.hata,          d.hata==null,     'Hata Adedi'],
+      ['hacik', d.hacik,         (d.hata>0 && !d.hacik), 'Hata Açıklaması (hata var)'],
+      ['iade',  d.iade,          d.iade==null,     'İade Edilen Adet']
+    ];
+    const missing = required.filter(r => r[2]);
+    if(missing.length){
+      toast('Zorunlu alan boş: ' + missing.map(r=>r[3]).join(', '));
+      $(missing[0][0]).focus();
+      return;
+    }
+    // kesin kurallar (kaydı durdurur)
+    if(d.hata!=null && d.ornek!=null && d.hata > d.ornek){
+      toast('Hata adedi, kontrol edilen (örneklem) adedinden büyük olamaz. Tüm partiyi reddettiysen "İade Edilen Adet"e yaz.');
+      $('hata').focus(); return;
+    }
+    if(d.iade!=null && d.gelen!=null && d.iade > d.gelen){
+      toast('İade adedi, gelen adetten büyük olamaz.');
+      $('iade').focus(); return;
+    }
+    if(editingEntry){
+      const {i,k}=editingEntry;
+      const c=cards[i];
+      const e=entryFrom(d);
+      e.time = (c.entries[k] && c.entries[k].time) || e.time;
+      c.entries[k]=e;
+      recalcCard(c);
+      exitEditMode();
+      toast((k+1)+'. giriş güncellendi.');
+    } else if(editingIndex!==null){
+      const c = cards[editingIndex];
+      c.tarih=d.tarih; c.tech=d.tech; c.shift=d.shift; c.pno=d.pno; c.ptan=d.ptan;
+      if(!c.entries || c.entries.length<=1){
+        c.entries=[entryFrom(d)]; recalcCard(c);
+      } else {
+        c.gelen=d.gelen; c.ornek=d.ornek; c.hata=d.hata; c.iade=d.iade; c.ekhata=d.ekhata; c.durum=d.durum; c.hacik=d.hacik;
+      }
+      exitEditMode();
+      toast('Kart güncellendi.');
+    } else {
+      const idx = cards.findIndex(c => norm(c.pno)===norm(d.pno));
+      if(idx>=0){
+        const ok = confirm(d.pno+' bugün zaten var.\n\nYeni giriş mevcut kartla BİRLEŞTİRİLSİN mi?\n\nTamam = birleştir     İptal = ayrı kart olarak ekle');
+        if(ok){
+          const c=cards[idx];
+          if(!c.ptan && d.ptan) c.ptan=d.ptan;
+          if(!c.entries) c.entries=[entryFrom(c)];
+          c.entries.push(entryFrom(d));
+          recalcCard(c);
+          toast(c.mergedCount+' giriş birleştirildi.');
+        } else {
+          cards.push(makeCard(d));
+          toast('Ayrı kart eklendi.');
+        }
+      } else {
+        cards.push(makeCard(d));
+        toast('Kart eklendi.');
+      }
+    }
+    renderList();
+    saveState();
+    clearPartFields();
+    render();
+    $('pno').focus();
+  }
+
+  function editCard(i){
+    fillForm(cards[i]);
+    enterEditMode(i);
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+    $('gelen').focus();
+  }
+
+  function copyCard(i){
+    const s = cards[i];
+    exitEditMode();
+    clearPartFields();
+    $('pno').value = s.pno||'';
+    $('ptan').value = s.ptan||'';
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+    $('gelen').focus();
+    toast('Aynı parça, yeni lot — adetleri gir ve "Kartı ekle".');
+  }
+
+  function clearForm(){
+    clearPartFields();
+    exitEditMode();
+    render();
+  }
+
+  function renderList(){
+    $('cnt').textContent = cards.length;
+    const wrap = $('list');
+    if(cards.length===0){ wrap.innerHTML='<div class="empty">Henüz kart eklenmedi.</div>'; return; }
+    wrap.innerHTML='';
+    cards.forEach((d,i)=>{
+      const tagCls = d.durum==='Kabul'?'kabul':(d.durum==='Kısmi Ret'?'kismi':'tam');
+      const multi = d.mergedCount>1;
+      const el=document.createElement('div'); el.className='item-wrap';
+      let html =
+        '<div class="item">'+
+          '<div class="meta"><span class="pno">'+esc(d.pno)+
+            '<span class="tag '+tagCls+'">'+esc(d.durum||'-')+'</span>'+
+            (multi?'<span class="tag merge" title="Girişleri göster/gizle" onclick="toggleEntries('+i+')">'+d.mergedCount+' giriş <i>'+(d._open?'▾':'▸')+'</i></span>':'')+'</span>'+
+            '<span class="det">Gelen '+(d.gelen??'-')+' / Örn '+(d.ornek??'-')+
+            ' · Hata '+(d.hata??'-')+' · İade '+(d.iade??'-')+(d.shift?' · '+esc(d.shift):'')+'</span></div>'+
+          '<div class="btns">'+
+            '<button class="mini" title="Bu kartı düzenle" onclick="editCard('+i+')">Düzenle</button>'+
+            '<button class="mini" title="Aynı parçadan yeni lot" onclick="copyCard('+i+')">Kopyala</button>'+
+            '<button class="x" title="Sil" onclick="removeCard('+i+')">×</button>'+
+          '</div>'+
+        '</div>';
+      if(multi && d._open){
+        html += '<div class="entries">';
+        d.entries.forEach((e,k)=>{
+          html += '<div class="entry">'+
+            '<span class="ehead">'+(k+1)+'. giriş'+(e.time?' · '+e.time:'')+'</span>'+
+            '<span class="edet">Gelen '+(e.gelen??'-')+' / Örn '+(e.ornek??'-')+' · Hata '+(e.hata??'-')+
+              ' · '+esc(e.durum||'-')+' · İade '+(e.iade??'-')+' · Ür.ek '+(e.ekhata??'-')+
+              (e.hacik?' · '+esc(e.hacik):'')+'</span>'+
+            '<button class="mini" title="Bu girişi düzenle" onclick="editEntry('+i+','+k+')">Düzenle</button>'+
+          '</div>';
+        });
+        html += '</div>';
+      }
+      el.innerHTML = html;
+      wrap.appendChild(el);
+    });
+  }
+  function toggleEntries(i){ cards[i]._open = !cards[i]._open; renderList(); }
+  function removeCard(i){
+    cards.splice(i,1);
+    if(editingEntry!==null){
+      if(i===editingEntry.i){ exitEditMode(); clearPartFields(); }
+      else if(i<editingEntry.i){ editingEntry.i--; }
+    }
+    if(editingIndex!==null){
+      if(i===editingIndex){ exitEditMode(); clearPartFields(); }
+      else if(i<editingIndex){ editingIndex--; }
+    }
+    renderList(); saveState();
+  }
+
+  function copyCurrent(){
+    const d=currentData();
+    if(!d.pno){ toast('Parça No boş.'); return; }
+    copy(cardBlockWA(previewCard(d))); toast('Mesaj kopyalandı.');
+  }
+  function copyAllWhatsapp(){
+    if(cards.length===0){ toast('Liste boş.'); return; }
+    copy(buildWhatsappAll()); toast('Günün raporu kopyalandı ('+cards.length+' ürün).');
+  }
+  function copyExcel(){
+    if(cards.length===0){ toast('Liste boş.'); return; }
+    const head=['Tarih','Kontrol Eden','Çalışma','Parça No','Parça Tanımı',
+      'Gelen Adet','Örneklem','Hata Adedi','Hata Açıklaması','Lot Durumu','İade Adedi','Üretim Ek Hata'];
+    const rows=cards.map(d=>[fmtDate(d.tarih),d.tech,d.shift,d.pno,d.ptan,
+      d.gelen??'',d.ornek??'',d.hata??'',d.hacik,d.durum,d.iade??'',d.ekhata??'']
+      .map(c=>String(c??'').replace(/\t/g,' ').replace(/\n/g,' ')).join('\t'));
+    copy([head.join('\t'),...rows].join('\n'));
+    toast('Tablo kopyalandı — Excel\'e yapıştır.');
+  }
+  // --- toplamlar / rapor tarihi ---
+  function computeTotals(){
+    const t={n:cards.length, parts:0, gelen:0, ornek:0, hata:0, iade:0, ekhata:0};
+    t.parts = new Set(cards.map(c=>norm(c.pno))).size;
+    cards.forEach(d=>{ t.gelen+=d.gelen||0; t.ornek+=d.ornek||0; t.hata+=d.hata||0; t.iade+=d.iade||0; t.ekhata+=d.ekhata||0; });
+    return t;
+  }
+  function reportDateLabel(){
+    if(!cards.length) return fmtDate($('date').value);
+    const ds=[...new Set(cards.map(c=>c.tarih))];
+    return ds.length===1 ? fmtDate(ds[0]) : 'muhtelif tarihler';
+  }
+  function encList(s){ return (s||'').split(/[;,]/).map(x=>x.trim()).filter(Boolean).join(','); }
+
+  // --- E-posta (mailto: Outlook'ta hazır e-posta açar) ---
+  function buildEmailBody(){
+    const t=computeTotals();
+    const who=(cards[0]&&cards[0].tech)||val('tech')||'-';
+    const L=[];
+    L.push('Merhaba,'); L.push('');
+    L.push(reportDateLabel()+' tarihli Arçelik Çıkış Kalite Kontrol gün sonu raporu aşağıdadır.'); L.push('');
+    L.push('Kontrol Eden: '+who);
+    L.push('');
+    L.push('ÖZET');
+    let ozet='Toplam ürün: '+t.parts+'  |  Gelen: '+t.gelen+'  |  Kontrol edilen: '+t.ornek+'  |  Hata: '+t.hata;
+    if(t.ekhata>0) ozet+='  |  Üretim ek: '+t.ekhata+'  |  Toplam hata: '+(t.hata+t.ekhata);
+    ozet+='  |  İade: '+t.iade;
+    L.push(ozet);
+    L.push('');
+    let idx=0;
+    groupByShift().forEach(g=>{
+      L.push('==================================================');
+      L.push('  '+g.shift.toLocaleUpperCase('tr')+'  ('+g.list.length+' ürün)');
+      g.list.forEach(c=>{
+        idx++;
+        L.push('--------------------------------------------------');
+        L.push(idx+') '+(c.pno||'-')+(c.ptan?' - '+c.ptan:''));
+        let pline='   Gelen: '+(c.gelen??'-')+' | Örneklem: '+(c.ornek??'-')+' | Hata: '+(c.hata??'-')+' | Durum: '+(c.durum||'-')+' | İade: '+(c.iade??'-')+' | Üretim ek hata: '+(c.ekhata??'-');
+        if(c.ekhata>0) pline+=' | Toplam hata: '+((c.hata||0)+(c.ekhata||0));
+        L.push(pline);
+        L.push('   Açıklama: '+(c.hacik||'-'));
+        if((c.mergedCount||1) > 1 && c.entries){
+          L.push('   Girişler ('+c.mergedCount+' giriş):');
+          c.entries.forEach((e,k)=>{
+            L.push('   - '+(k+1)+'. giriş'+(e.time?' ('+e.time+')':'')+' → Gelen: '+(e.gelen??'-')+' | Örn: '+(e.ornek??'-')+' | Hata: '+(e.hata??'-')+' | Durum: '+(e.durum||'-')+' | İade: '+(e.iade??'-')+' | Ür.ek: '+(e.ekhata??'-')+' | Açıklama: '+(e.hacik||'-'));
+          });
+        }
+      });
+    });
+    L.push('==================================================');
+    L.push(''); L.push('İyi çalışmalar.');
+    return L.join('\n');
+  }
+  function openEmail(){
+    if(cards.length===0){ toast('Liste boş.'); return; }
+    const subject='Arçelik ÇKK Gün Sonu Raporu - '+reportDateLabel()+((cards[0]&&cards[0].tech)?' - '+cards[0].tech:'');
+    const params=[];
+    const cc=encList(val('mailcc')); if(cc) params.push('cc='+cc);
+    params.push('subject='+encodeURIComponent(subject));
+    params.push('body='+encodeURIComponent(buildEmailBody()));
+    const url='mailto:'+encList(val('mailto'))+'?'+params.join('&');
+    if(url.length>1800){ toast('Uyarı: rapor uzun, e-posta programı kırpabilir. Uzun günlerde Excel/WhatsApp çıktısını da kullan.'); }
+    window.location.href=url;
+  }
+
+  // --- Yazdır / PDF (temiz rapor tablosu) ---
+  function printReport(){
+    if(cards.length===0){ toast('Liste boş.'); return; }
+    const t=computeTotals();
+    const who=(cards[0]&&cards[0].tech)||val('tech')||'-';
+    const shift=(cards[0]&&cards[0].shift)||val('shift')||'';
+    let rows='';
+    cards.forEach((d,i)=>{
+      rows+='<tr><td>'+(i+1)+'</td><td>'+esc(d.pno||'-')+'</td><td>'+esc(d.ptan||'-')+'</td>'+
+        '<td>'+esc(d.shift||'-')+'</td>'+
+        '<td>'+(d.gelen??'-')+'</td><td>'+(d.ornek??'-')+'</td><td>'+(d.hata??'-')+'</td>'+
+        '<td>'+esc(d.durum||'-')+'</td><td>'+(d.iade??'-')+'</td><td>'+(d.ekhata??'-')+'</td>'+
+        '<td>'+esc(d.hacik||'-')+'</td></tr>';
+    });
+    rows+='<tr class="tot"><td colspan="4">TOPLAM ('+t.n+' kart)</td><td>'+t.gelen+'</td><td>'+t.ornek+'</td><td>'+t.hata+'</td><td>-</td><td>'+t.iade+'</td><td>'+t.ekhata+'</td><td></td></tr>';
+    const img=document.querySelector('.logo img');
+    const logoHtml=(img && img.style.display!=='none' && img.complete && img.naturalWidth>0)
+      ? '<img class="pr-logo" src="'+img.getAttribute('src')+'">'
+      : '<span class="pr-fallback">UDEA</span>';
+    document.getElementById('printArea').innerHTML=
+      '<div class="pr-head">'+logoHtml+
+        '<div><h2>Arçelik Çıkış Kalite Kontrol - Gün Sonu Raporu</h2>'+
+        '<p class="pr-meta">Tarih: '+reportDateLabel()+'  ·  Kontrol Eden: '+esc(who)+'</p></div></div>'+
+      '<p class="pr-sum">Toplam kart: '+t.n+'  ·  Gelen: '+t.gelen+'  ·  Kontrol edilen: '+t.ornek+'  ·  Hata: '+t.hata+'  ·  İade: '+t.iade+'</p>'+
+      '<table class="pr"><thead><tr><th>#</th><th>Parça No</th><th>Tanım</th><th>Çalışma</th><th>Gelen</th><th>Örn.</th><th>Hata</th><th>Durum</th><th>İade</th><th>Ür.Ek</th><th>Açıklama</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table>'+
+      '<p class="pr-foot">Yazdırma zamanı: '+new Date().toLocaleString('tr-TR')+'</p>';
+    window.print();
+  }
+
+  function resetDay(){
+    if(cards.length && !confirm('Günün tüm kartları silinecek. Emin misin?')) return;
+    cards=[]; renderList();
+    document.getElementById('crossday').classList.remove('show');
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    toast('Gün sıfırlandı.');
+  }
+
+  // yardımcılar
+  function copy(t){
+    if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(t).catch(()=>fallbackCopy(t)); }
+    else fallbackCopy(t);
+  }
+  function fallbackCopy(t){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
+    try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); }
+  function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  let toastT;
+  function toast(m){ const el=$('toast'); el.textContent=m; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),1900); }
+
+  // teknisyen/vardiya değişince de kaydet
+  ['tech','shift','mailcc'].forEach(id => $(id).addEventListener('change', saveState));
+
+  // açılışta kayıtlı veriyi geri yükle
+  loadState();
+  renderList();
+  render();
+</script>
+</body>
+</html>
